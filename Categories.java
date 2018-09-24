@@ -83,7 +83,7 @@ public class Categories extends javax.swing.JFrame {
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 180, -1, -1));
 
         jLabel2.setText("Name");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 360, -1, 20));
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 360, -1, 20));
 
         categoryName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -301,7 +301,12 @@ public class Categories extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton10ActionPerformed
 
     private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
-        // TODO add your handling code here:
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new Search().setVisible(true);
+            }
+        });
+        this.dispose();
     }//GEN-LAST:event_jButton11ActionPerformed
 
     private void categoryNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_categoryNameActionPerformed
@@ -330,11 +335,11 @@ public class Categories extends javax.swing.JFrame {
                 category = jlstCategories.getSelectedValue();
                 if(category != null)
                 {
-                    new ProductService(category).setVisible(true);
+                    new ProductService(category, null).setVisible(true);
                 }
                 else
                 {
-                    new ProductService("all").setVisible(true);
+                    new ProductService("all", null).setVisible(true);
                 }
             }
         });

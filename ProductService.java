@@ -31,7 +31,7 @@ import javax.swing.table.DefaultTableModel;
  */
 public class ProductService extends javax.swing.JFrame {
 
-    private String category;
+    private String category, productName;
     private Paging paging;
     private int totalPages;
     private int totalRecords;
@@ -42,9 +42,16 @@ public class ProductService extends javax.swing.JFrame {
     /**
      * Creates new form ProductService
      */
-    public ProductService(String category)
+    public ProductService(String category, String productName)
     {
         this.category = category;
+        this.productName = productName;
+        
+        if(this.category == null)
+            this.category = "all";
+
+        if(this.productName == null)
+            this.productName = "";
 
         paging = new Paging();
         paging.setCurrentPage(1);
@@ -635,10 +642,21 @@ public class ProductService extends javax.swing.JFrame {
                     + " offset " + ((paging.getCurrentPage()-1)*paging.getRecordsPerPage())
                     + ";";
             }
+            if(!this.productName.equals("")) {
+                sqlString = "select * from products2"
+                    + " where productName like ?"
+                    + " order by inputdate desc"
+                    + " limit " + paging.getRecordsPerPage() 
+                    + " offset " + ((paging.getCurrentPage()-1)*paging.getRecordsPerPage())
+                    + ";";
+            }
             PreparedStatement ps = con.prepareStatement(
                     sqlString);
             if(!this.category.equals("all")) {
                 ps.setString(1, this.category);
+            }
+            if(!this.productName.equals("")) {
+                ps.setString(1, "%" + this.productName + "%");
             }
             ResultSet rs = ps.executeQuery();
             while(rs.next())
@@ -990,7 +1008,12 @@ public class ProductService extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton10ActionPerformed
 
     private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton11ActionPerformed
-
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new Search().setVisible(true);
+            }
+        });
+        this.dispose();
     }//GEN-LAST:event_jButton11ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
