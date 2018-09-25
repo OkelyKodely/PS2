@@ -45,7 +45,9 @@ public class ProductService extends javax.swing.JFrame {
     private Product currentProduct;
     private File file;
     private byte[] imgBytes;
+    private String printType = "";
     private String currentPagePrintStr = "";
+    private String currentProductPrintStr = "";
 
     /**
      * Creates new form ProductService
@@ -437,6 +439,11 @@ public class ProductService extends javax.swing.JFrame {
         jPanel2.add(jButton14, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 310, -1, -1));
 
         jButton15.setText("Print Current Product");
+        jButton15.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton15ActionPerformed(evt);
+            }
+        });
         jPanel2.add(jButton15, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 310, 150, -1));
 
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/print.png"))); // NOI18N
@@ -1053,6 +1060,8 @@ public class ProductService extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton11ActionPerformed
 
     private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton14ActionPerformed
+        this.printType = "current page";
+        
         final String spacing = "            ";
 
         currentPagePrintStr = "Product ID" + spacing + "Price" + spacing + "Name" + spacing + "Stock Qty\n \n";
@@ -1070,10 +1079,23 @@ public class ProductService extends javax.swing.JFrame {
             currentPagePrintStr += "\n";
         }
 
-        printCurrentPage();
+        print();
     }//GEN-LAST:event_jButton14ActionPerformed
 
-    private void printCurrentPage()
+    private void jButton15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15ActionPerformed
+        this.printType = "current product";
+
+        currentProductPrintStr = "Product ID: " + jtxtProductID1.getText() + "\n";
+        currentProductPrintStr += "Name: " + jtxtName.getText() + "\n";
+        currentProductPrintStr += "Price: " + jtxtPrice.getText() + "\n";
+        currentProductPrintStr += "Category: " + jcmbCategories.getSelectedItem().toString() + "\n";
+        currentProductPrintStr += "Description: " + jtxtDesc.getText() + "\n";
+        currentProductPrintStr += "Stock Qty: " + jtxtStockQty.getText();
+        
+        print();
+    }//GEN-LAST:event_jButton15ActionPerformed
+
+    private void print()
     {
         PrinterJob job = PrinterJob.getPrinterJob(); 
         PageFormat landscape = job.defaultPage();
@@ -1096,9 +1118,17 @@ public class ProductService extends javax.swing.JFrame {
 
         public int print(Graphics g, PageFormat pf, int pageIndex) throws PrinterException
         {
+            java.util.StringTokenizer st = null;
             g.setFont(fnt);
             g.setColor(Color.black);
-            java.util.StringTokenizer st = new java.util.StringTokenizer(currentPagePrintStr, "\n");
+            if(printType.equals("current page"))
+            {
+                st = new java.util.StringTokenizer(currentPagePrintStr, "\n");
+            }
+            if(printType.equals("current product"))
+            {
+                st = new java.util.StringTokenizer(currentProductPrintStr, "\n");
+            }
             int i = 0;
             while(st.hasMoreTokens())
             {
