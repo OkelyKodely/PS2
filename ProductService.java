@@ -1,7 +1,14 @@
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.print.Book;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,6 +45,7 @@ public class ProductService extends javax.swing.JFrame {
     private Product currentProduct;
     private File file;
     private byte[] imgBytes;
+    private String currentPagePrintStr = "";
 
     /**
      * Creates new form ProductService
@@ -152,6 +160,11 @@ public class ProductService extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        jButton12 = new javax.swing.JButton();
+        jButton13 = new javax.swing.JButton();
+        jButton14 = new javax.swing.JButton();
+        jButton15 = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
         shallYouValidate = new javax.swing.JLabel();
         jButton8 = new javax.swing.JButton();
         jButton9 = new javax.swing.JButton();
@@ -163,7 +176,6 @@ public class ProductService extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1280, 750));
-        setPreferredSize(new java.awt.Dimension(1280, 750));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(245, 245, 245));
@@ -394,19 +406,43 @@ public class ProductService extends javax.swing.JFrame {
         jPanel1.add(jtxtStockQty, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 20, 110, 60));
 
         jPanel2.setBackground(new java.awt.Color(245, 245, 245));
-        jPanel2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 10));
+        jPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(102, 102, 102));
         jLabel2.setText("Database Application");
-        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 240, -1, -1));
+        jPanel2.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 200, -1, -1));
 
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/logo.png"))); // NOI18N
-        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 80, -1, -1));
+        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 60, -1, -1));
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(102, 102, 102));
         jLabel4.setText("Product Service");
         jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 150, -1, -1));
+
+        jButton12.setText("Print All");
+        jPanel2.add(jButton12, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 260, -1, -1));
+
+        jButton13.setText("Print Current Category");
+        jPanel2.add(jButton13, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 260, 150, -1));
+
+        jButton14.setText("Print Current Page");
+        jButton14.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton14ActionPerformed(evt);
+            }
+        });
+        jPanel2.add(jButton14, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 310, -1, -1));
+
+        jButton15.setText("Print Current Product");
+        jPanel2.add(jButton15, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 310, 150, -1));
+
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/print.png"))); // NOI18N
+        jLabel5.setText("        ");
+        jLabel5.setPreferredSize(new java.awt.Dimension(50, 50));
+        jPanel2.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 260, 30, -1));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 100, 350, 370));
 
@@ -1016,10 +1052,71 @@ public class ProductService extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_jButton11ActionPerformed
 
+    private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton14ActionPerformed
+        final String spacing = "            ";
+
+        currentPagePrintStr = "Product ID" + spacing + "Price" + spacing + "Name" + spacing + "Stock Qty\n \n";
+        currentPagePrintStr += "---------------------------------------------------------------------------------------------\n \n ";
+
+        DefaultTableModel model = (DefaultTableModel) jtblProducts.getModel();
+        int columnCount = model.getColumnCount();
+        int rowCount = model.getRowCount();
+        for(int i=0; i<rowCount; i++)
+        {
+            for(int j=0; j<columnCount; j++)
+            {
+                currentPagePrintStr += model.getValueAt(i, j).toString() + spacing;
+            }
+            currentPagePrintStr += "\n";
+        }
+
+        printCurrentPage();
+    }//GEN-LAST:event_jButton14ActionPerformed
+
+    private void printCurrentPage()
+    {
+        PrinterJob job = PrinterJob.getPrinterJob(); 
+        PageFormat landscape = job.defaultPage();
+        landscape.setOrientation(PageFormat.LANDSCAPE);
+        Book bk = new Book();
+        bk.append(new PaintCover(), job.defaultPage());
+        job.setPageable(bk);
+        if (job.printDialog()) {
+            try {
+                job.print();
+            } catch (Exception exc) {
+                System.out.println(exc);
+            }
+        }
+    }                                        
+
+    private class PaintCover implements Printable
+    {
+        private Font fnt = new Font("Helvetica-Bold", Font.PLAIN, 14);
+
+        public int print(Graphics g, PageFormat pf, int pageIndex) throws PrinterException
+        {
+            g.setFont(fnt);
+            g.setColor(Color.black);
+            java.util.StringTokenizer st = new java.util.StringTokenizer(currentPagePrintStr, "\n");
+            int i = 0;
+            while(st.hasMoreTokens())
+            {
+                String line = st.nextToken();
+                g.drawString(line, 100, 100 + i++*14);
+            }
+            return Printable.PAGE_EXISTS;
+        }
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
+    private javax.swing.JButton jButton12;
+    private javax.swing.JButton jButton13;
+    private javax.swing.JButton jButton14;
+    private javax.swing.JButton jButton15;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
@@ -1032,6 +1129,7 @@ public class ProductService extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
