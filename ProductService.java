@@ -46,6 +46,7 @@ public class ProductService extends javax.swing.JFrame {
     private File file;
     private byte[] imgBytes;
     private String printType = "";
+    private String printStr = "";
     private String currentPagePrintStr = "";
     private String currentProductPrintStr = "";
 
@@ -425,9 +426,19 @@ public class ProductService extends javax.swing.JFrame {
         jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 150, -1, -1));
 
         jButton12.setText("Print All");
+        jButton12.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton12ActionPerformed(evt);
+            }
+        });
         jPanel2.add(jButton12, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 260, -1, -1));
 
         jButton13.setText("Print Current Category");
+        jButton13.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton13ActionPerformed(evt);
+            }
+        });
         jPanel2.add(jButton13, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 260, 150, -1));
 
         jButton14.setText("Print Current Page");
@@ -1062,10 +1073,15 @@ public class ProductService extends javax.swing.JFrame {
     private void jButton14ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton14ActionPerformed
         this.printType = "current page";
         
-        final String spacing = "            ";
+        String spacing = "";
 
-        currentPagePrintStr = "Product ID" + spacing + "Price" + spacing + "Name" + spacing + "Stock Qty\n \n";
-        currentPagePrintStr += "---------------------------------------------------------------------------------------------\n \n ";
+        String fortySpaces = "";
+        for(int a=0; a<40; a++)
+            fortySpaces += " ";
+        
+        currentPagePrintStr = "";
+        currentPagePrintStr = "Product ID" + fortySpaces + "Price     " + fortySpaces + "Name      " + fortySpaces + "Stock Qty\n \n";
+        currentPagePrintStr += "---------------------------------------------------------------------------------------------------------------------------------------------------------------\n \n";
 
         DefaultTableModel model = (DefaultTableModel) jtblProducts.getModel();
         int columnCount = model.getColumnCount();
@@ -1074,7 +1090,14 @@ public class ProductService extends javax.swing.JFrame {
         {
             for(int j=0; j<columnCount; j++)
             {
-                currentPagePrintStr += model.getValueAt(i, j).toString() + spacing;
+                String value = model.getValueAt(i, j).toString();
+                int valueLength = value.length();
+                spacing = "";
+                for(int k=0; k<50-valueLength; k++)
+                {
+                    spacing += " ";
+                }
+                currentPagePrintStr += value + spacing;
             }
             currentPagePrintStr += "\n";
         }
@@ -1085,6 +1108,7 @@ public class ProductService extends javax.swing.JFrame {
     private void jButton15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15ActionPerformed
         this.printType = "current product";
 
+        currentProductPrintStr = "";
         currentProductPrintStr = "Product ID: " + jtxtProductID1.getText() + "\n";
         currentProductPrintStr += "Name: " + jtxtName.getText() + "\n";
         currentProductPrintStr += "Price: " + jtxtPrice.getText() + "\n";
@@ -1094,6 +1118,198 @@ public class ProductService extends javax.swing.JFrame {
         
         print();
     }//GEN-LAST:event_jButton15ActionPerformed
+
+    private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton12ActionPerformed
+        PrinterJob job = PrinterJob.getPrinterJob(); 
+        PageFormat landscape = job.defaultPage();
+        landscape.setOrientation(PageFormat.LANDSCAPE);
+        Book bk = new Book();
+        bk.append(new PaintCover(), job.defaultPage());
+        job.setPageable(bk);
+        if (job.printDialog()) {
+            try {
+                try
+                {
+                    Connection con = getConnection();
+                    String sqlString = "select * from products2 order by inputdate desc";
+                    PreparedStatement ps = con.prepareStatement(
+                            sqlString);
+                    ResultSet rs = ps.executeQuery();
+                    printStr = "";
+                    this.printType = "all";
+
+                    String spacing = "";
+
+                    String fortySpaces = "";
+                    for(int a=0; a<40; a++)
+                        fortySpaces += " ";
+
+                    printStr = "";
+                    printStr = "Product ID" + fortySpaces + "Price     " + fortySpaces + "Name      " + fortySpaces + "Stock Qty\n \n";
+                    printStr += "---------------------------------------------------------------------------------------------------------------------------------------------------------------\n \n";
+                    int i = 0;
+                    while(rs.next())
+                    {
+                        if(i == 15)
+                        {
+                            job.print();
+                            printStr = "";
+                            printStr = "Product ID" + fortySpaces + "Price     " + fortySpaces + "Name      " + fortySpaces + "Stock Qty\n \n";
+                            printStr += "---------------------------------------------------------------------------------------------------------------------------------------------------------------\n \n";
+                            i = 0;
+                        }
+                        String a = rs.getString("productID");
+                        String b = rs.getString("price");
+                        String c = rs.getString("productName");
+                        String d = rs.getString("stockQty");
+                        String value = a;
+                        int valueLength = value.length();
+                        spacing = "";
+                        for(int k=0; k<50-valueLength; k++)
+                        {
+                            spacing += " ";
+                        }
+                        printStr += value + spacing;
+                        value = b;
+                        valueLength = value.length();
+                        spacing = "";
+                        for(int k=0; k<50-valueLength; k++)
+                        {
+                            spacing += " ";
+                        }
+                        printStr += value + spacing;
+                        value = c;
+                        valueLength = value.length();
+                        spacing = "";
+                        for(int k=0; k<50-valueLength; k++)
+                        {
+                            spacing += " ";
+                        }
+                        printStr += value + spacing;
+                        value = d;
+                        valueLength = value.length();
+                        spacing = "";
+                        for(int k=0; k<50-valueLength; k++)
+                        {
+                            spacing += " ";
+                        }
+                        printStr += value + spacing;
+                        printStr += "\n";
+                        i++;
+                    }
+                    rs.close();
+                    ps.close();
+
+                    con.close();
+                    
+                    job.print();
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            } catch (Exception exc) {
+                System.out.println(exc);
+            }
+        }
+    }//GEN-LAST:event_jButton12ActionPerformed
+
+    private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton13ActionPerformed
+        if(this.category == null)
+            return;
+        PrinterJob job = PrinterJob.getPrinterJob(); 
+        PageFormat landscape = job.defaultPage();
+        landscape.setOrientation(PageFormat.LANDSCAPE);
+        Book bk = new Book();
+        bk.append(new PaintCover(), job.defaultPage());
+        job.setPageable(bk);
+        if (job.printDialog()) {
+            try {
+                try
+                {
+                    Connection con = getConnection();
+                    String sqlString = "select * from products2 where category = '" + this.category + "' order by inputdate desc";
+                    PreparedStatement ps = con.prepareStatement(
+                            sqlString);
+                    ResultSet rs = ps.executeQuery();
+                    printStr = "";
+                    this.printType = "all";
+
+                    String spacing = "";
+
+                    String fortySpaces = "";
+                    for(int a=0; a<40; a++)
+                        fortySpaces += " ";
+
+                    printStr = "";
+                    printStr = "Product ID" + fortySpaces + "Price     " + fortySpaces + "Name      " + fortySpaces + "Stock Qty\n \n";
+                    printStr += "---------------------------------------------------------------------------------------------------------------------------------------------------------------\n \n";
+                    int i = 0;
+                    while(rs.next())
+                    {
+                        if(i == 15)
+                        {
+                            job.print();
+                            printStr = "";
+                            printStr = "Product ID" + fortySpaces + "Price     " + fortySpaces + "Name      " + fortySpaces + "Stock Qty\n \n";
+                            printStr += "---------------------------------------------------------------------------------------------------------------------------------------------------------------\n \n";
+                            i = 0;
+                        }
+                        String a = rs.getString("productID");
+                        String b = rs.getString("price");
+                        String c = rs.getString("productName");
+                        String d = rs.getString("stockQty");
+                        String value = a;
+                        int valueLength = value.length();
+                        spacing = "";
+                        for(int k=0; k<50-valueLength; k++)
+                        {
+                            spacing += " ";
+                        }
+                        printStr += value + spacing;
+                        value = b;
+                        valueLength = value.length();
+                        spacing = "";
+                        for(int k=0; k<50-valueLength; k++)
+                        {
+                            spacing += " ";
+                        }
+                        printStr += value + spacing;
+                        value = c;
+                        valueLength = value.length();
+                        spacing = "";
+                        for(int k=0; k<50-valueLength; k++)
+                        {
+                            spacing += " ";
+                        }
+                        printStr += value + spacing;
+                        value = d;
+                        valueLength = value.length();
+                        spacing = "";
+                        for(int k=0; k<50-valueLength; k++)
+                        {
+                            spacing += " ";
+                        }
+                        printStr += value + spacing;
+                        printStr += "\n";
+                        i++;
+                    }
+                    rs.close();
+                    ps.close();
+
+                    con.close();
+                    
+                    job.print();
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
+            } catch (Exception exc) {
+                System.out.println(exc);
+            }
+        }
+    }//GEN-LAST:event_jButton13ActionPerformed
 
     private void print()
     {
@@ -1121,8 +1337,14 @@ public class ProductService extends javax.swing.JFrame {
             java.util.StringTokenizer st = null;
             g.setFont(fnt);
             g.setColor(Color.black);
+            if(printType.equals("all"))
+            {
+                g.setFont(new Font("Helvetica-Bold", Font.PLAIN, 8));
+                st = new java.util.StringTokenizer(printStr, "\n");
+            }
             if(printType.equals("current page"))
             {
+                g.setFont(new Font("Helvetica-Bold", Font.PLAIN, 8));
                 st = new java.util.StringTokenizer(currentPagePrintStr, "\n");
             }
             if(printType.equals("current product"))
